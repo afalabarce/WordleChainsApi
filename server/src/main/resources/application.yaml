@@ -1,0 +1,20 @@
+ktor:
+  deployment:
+    port: 8080
+    host: 127.0.0.1
+    connectionGroupSize: 20
+    workerGroupSize: 50
+    callGroupSize: 100
+    shutdownGracePeriod: 2000
+    shutdownTimeout: 3000
+  application:
+    modules:
+      - dev.afalabarce.wordlechains.api.ApplicationKt.module
+    debug: true
+    swaggerPath: /resources/openapi/documentation.yaml
+  database:
+    server: localhost
+    port: 5432
+    databaseName: wordleapp
+    userName: postgres
+    password:

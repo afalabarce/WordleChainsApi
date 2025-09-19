@@ -1,0 +1,201 @@
+openapi: "3.1.0"
+info:
+  title: Words Chain App API
+  version: "1.0"
+servers:
+  - url: https://api.wordle.afalabarce.dev/v1
+    description: Production Server
+  - url: http://localhost:8080/v1/
+    description: Local Server
+components:
+  schemas:
+    Country:
+      type: object
+      properties:
+        countryId:
+          type: string
+        countryName:
+          type: string
+        flagUrl:
+          type: string
+    Word:
+      type: object
+      properties:
+        wordId:
+          type: integer
+        word:
+          type: string
+        definition:
+          type: string
+        language:
+          type: string
+    HallOfFame:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        playerNick:
+          type: string
+          example: "WordleSpanishUser"
+        deviceId:
+          type: string
+          example: "device1"
+        playerCountry:
+          type: string
+          example: "ESP"
+        lastPlayDate:
+          type: string
+          format: date
+        wordsCount1:
+          type: integer
+          format: int64
+          example: 13
+        wordsCount2:
+          type: integer
+          format: int64
+          example: 5
+        wordsCount3:
+          type: integer
+          format: int64
+          example: 10
+        wordsCount4:
+          type: integer
+          format: int64
+          example: 20
+        wordsCount5:
+          type: integer
+          format: int64
+          example: 34
+        wordsCount6:
+          type: integer
+          format: int64
+          example: 21
+        score:
+          type: integer
+          format: int32
+          example: 109
+          description: Player score (read only and self calculated)
+
+paths:
+  /countries:
+    get:
+      tags:
+        - "Mandatory Entity Data End Points"
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Country'
+          description: Returns a list of countries
+  /words/{language}:
+    get:
+      tags:
+        - "Mandatory Entity Data End Points"
+      parameters:
+        - name: language
+          in: path
+          description: The language of the words (if empty returns all available words in any language)
+          allowEmptyValue: true
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Word'
+          description: Returns a list of words
+
+  /availableLanguages:
+    get:
+      tags:
+        - "General purpose End Points"
+      responses:
+        '200':
+          description: OK - list of available languages for words
+  /nickAvailable/{playerNick}:
+    get:
+      tags:
+        - "General Purpose End Points"
+      parameters:
+        - name: playerNick
+          in: path
+          description: The player nick
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK - The player nick is available
+        '409':
+          description: Conflict - The player nick is not available
+        '400':
+          description: Bad Request - The player nick is required
+
+  /dailyGame/{date}/{language}:
+    get:
+      tags:
+        - "Game End Points"
+      parameters:
+        - name: date
+          in: path
+          description: The date of the game
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: language
+          in: path
+          description: The language of the words
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /hallOfFame:
+    get:
+      tags:
+        - "Game End Points"
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HallOfFame'
+          description: Returns the hall of fame
+    post:
+      tags:
+        - "Game End Points"
+      parameters:
+        - name: Device-Id
+          in: header
+          description: The device id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The hall of fame to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HallOfFame'
+      responses:
+        '200':
+          description: OK - The hall of fame has been updated
+        '400':
+          description: Bad Request - The hall of fame is required
+        '500':
+          description: Internal Server Error - The hall of fame could not be updated
+
+

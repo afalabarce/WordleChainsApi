@@ -9,6 +9,43 @@ servers:
     description: Local Server
 components:
   schemas:
+    DailyGameWord:
+      type: object
+      properties:
+        dailyGameWordId:
+          type: integer
+          format: int64
+        dailyId:
+          type: integer
+          format: int64
+        wordId:
+          type: integer
+          format: int64
+        linkedWordId:
+          type: integer
+          format: int64
+        linkingPosition:
+          type: integer
+          format: int32
+        linkedWordPosition:
+          type: integer
+          format: int32
+    DailyGame:
+      type: object
+      properties:
+        dailyId:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date
+        language:
+          type: string
+        words:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyGameWord'
+
     Country:
       type: object
       properties:
@@ -159,7 +196,11 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyGame'
+          description: Returns the daily game
   /hallOfFame:
     get:
       tags:

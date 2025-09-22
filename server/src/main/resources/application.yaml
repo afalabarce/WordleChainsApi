@@ -11,7 +11,7 @@ ktor:
     modules:
       - dev.afalabarce.wordlechains.api.ApplicationKt.module
     debug: true
-    swaggerPath: /resources/openapi/documentation.yaml
+    swaggerPath: /Users/afalabarce/AndroidStudioProjects/WordleChainsApi/server/src/main/resources/openapi/documentation.yaml
   database:
     server: localhost
     port: 5432

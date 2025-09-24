@@ -14,8 +14,11 @@ suspend fun RoutingCall.getDailyGame(database: Database){
 
     if (dailyGame.isValidDate() && language.orEmpty().isNotEmpty()) {
         val localDate: LocalDate = LocalDate.parse(dailyGame!!)
-
-        respond(database.getDailyGame(localDate, language!!))
+        val dailyGame = database.getDailyGame(localDate, language!!)
+        if (dailyGame != null)
+            respond(dailyGame)
+        else
+            respond(status = HttpStatusCode.NotFound, "Daily game not found")
     }else {
         this.respond(status = HttpStatusCode.BadRequest, "Invalid date format")
     }

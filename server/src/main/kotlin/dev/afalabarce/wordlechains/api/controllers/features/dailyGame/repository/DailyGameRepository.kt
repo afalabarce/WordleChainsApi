@@ -10,10 +10,10 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
 
-suspend fun Database.getDailyGame(date: LocalDate, language: String): DailyGame = suspendTransaction {
+suspend fun Database.getDailyGame(date: LocalDate, language: String): DailyGame? = suspendTransaction {
     DailyGameDao.find {
         ExposedDailyGame.date eq date.toEpochDays() and(
             ExposedDailyGame.language eq language
         )
-    }.first().let(::dailyGameDaoToModel)
+    }.firstOrNull()?.let(::dailyGameDaoToModel)
 }

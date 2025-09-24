@@ -13,9 +13,9 @@ object ExposedDailyGameWord: IntIdTable(
 ) {
     val dailyId = reference(name = "daily_id", refColumn = ExposedDailyGame.id)
     val wordId = reference("word_id", refColumn = ExposedWord.id)
-    val linkedWordId = reference("linked_word_id", refColumn = ExposedWord.id)
-    val linkingPosition = integer(name = "linking_position")
-    val linkedWordPosition = integer(name = "linked_word_position")
+    val linkedWordId = reference("linked_word_id", refColumn = ExposedWord.id).nullable()
+    val linkingPosition = integer(name = "linking_position").nullable()
+    val linkedWordPosition = integer(name = "linked_word_position").nullable()
 
     init {
         foreignKey(
@@ -30,7 +30,7 @@ class DailyGameWordDao(id: EntityID<Int>): IntEntity(id){
     companion object : IntEntityClass<DailyGameWordDao>(ExposedDailyGameWord)
     var dailyId by ExposedDailyGameWord.dailyId
     var word: WordDao by WordDao referencedOn ExposedDailyGameWord.wordId
-    var linkedWord: WordDao by WordDao referencedOn ExposedDailyGameWord.linkedWordId
+    var linkedWord by ExposedDailyGameWord.linkedWordId
     var linkingPosition by ExposedDailyGameWord.linkingPosition
     var linkedWordPosition by ExposedDailyGameWord.linkedWordPosition
 }

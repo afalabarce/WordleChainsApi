@@ -14,6 +14,7 @@ exposed-r2dbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "
 exposed-spring-transaction = { module = "org.jetbrains.exposed:spring-transaction", version.ref = "exposed" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+ktor-authentication = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-contentNegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
 ktor-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor" }

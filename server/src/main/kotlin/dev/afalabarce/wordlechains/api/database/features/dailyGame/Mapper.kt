@@ -15,7 +15,7 @@ fun dailyGameWordDaoToModel(dailyGameWordDao: DailyGameWordDao): DailyGameWord =
     dailyGameWordId = dailyGameWordDao.id.value,
     dailyId = dailyGameWordDao.dailyId.value,
     wordId = dailyGameWordDao.word.wordId.value,
-    linkedWordId = dailyGameWordDao.linkedWord.wordId.value,
+    linkedWordId = dailyGameWordDao.linkedWord?.value,
     linkingPosition = dailyGameWordDao.linkingPosition,
     linkedWordPosition = dailyGameWordDao.linkedWordPosition
 )

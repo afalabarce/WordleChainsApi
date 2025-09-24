@@ -7,7 +7,7 @@ data class DailyGameWord(
     val dailyGameWordId: Int,
     val dailyId: Int,
     val wordId: Int,
-    val linkedWordId: Int,
-    val linkingPosition: Int,
-    val linkedWordPosition: Int,
+    val linkedWordId: Int?,
+    val linkingPosition: Int?,
+    val linkedWordPosition: Int?,
 )

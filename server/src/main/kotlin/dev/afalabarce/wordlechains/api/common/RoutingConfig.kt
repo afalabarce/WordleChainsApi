@@ -8,6 +8,7 @@ import dev.afalabarce.wordlechains.api.controllers.features.hallOfFame.updateHal
 import dev.afalabarce.wordlechains.api.controllers.features.words.availableLanguages
 import dev.afalabarce.wordlechains.api.controllers.features.words.getWords
 import io.ktor.server.application.Application
+import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
@@ -31,10 +32,6 @@ fun Application.configureRouting(database: Database){
             call.availableLanguages(database)
         }
 
-        get(path = "/v1/dailyGame/{dailyGame}/{language}") {
-            call.getDailyGame(database)
-        }
-
         get(path = "/v1/hallOfFame") {
             call.getHallOfFame(database)
         }
@@ -43,13 +40,19 @@ fun Application.configureRouting(database: Database){
             call.nickAvailable(database)
         }
 
-        post(path = "/v1/hallOfFame") {
-
-            call.updateHallOfFame(database)
-        }
-
         get(path = "/v1/countries") {
             call.getCountries(database)
+        }
+
+        authenticate {
+            get(path = "/v1/dailyGame/{dailyGame}/{language}") {
+                call.getDailyGame(database)
+            }
+
+            post(path = "/v1/hallOfFame") {
+
+                call.updateHallOfFame(database)
+            }
         }
     }
 }

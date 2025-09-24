@@ -22,6 +22,7 @@ dependencies {
     implementation(libs.exposed.migration.r2dbc)
     implementation(libs.exposed.r2dbc)
     implementation(libs.exposed.spring.transaction)
+    implementation(libs.ktor.authentication)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.contentNegotiation)
     implementation(libs.ktor.cors)

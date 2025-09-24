@@ -6,5 +6,4 @@ fun countryDaoToModel(dao: CountryDao): Country = Country(
     countryId = dao.countryId.value,
     countryName = dao.countryName,
     flagUrl = dao.countryFlag
-
 )

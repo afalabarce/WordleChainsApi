@@ -11,6 +11,8 @@ ktor:
     modules:
       - dev.afalabarce.wordlechains.api.ApplicationKt.module
     debug: true
+    security:
+      privateKeyPath: /Users/afalabarce/AndroidStudioProjects/WordleChainsApi/server/src/main/resources/ssl/private.key
     swaggerPath: /Users/afalabarce/AndroidStudioProjects/WordleChainsApi/server/src/main/resources/openapi/documentation.yaml
   database:
     server: localhost

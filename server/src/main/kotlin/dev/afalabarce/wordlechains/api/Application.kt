@@ -12,9 +12,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 fun Application.module() {
     installPlugins()
     databaseConnect()?.let { database ->
-        installAuthentication { token ->
-            mapOf()
-        }
+        installAuthentication(database)
         configureRouting(database)
     } ?: run {
         throw IllegalStateException("Database Exception")

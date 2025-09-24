@@ -3,11 +3,14 @@ info:
   title: Words Chain App API
   version: "1.0"
 servers:
-  - url: https://api.wordle.afalabarce.dev/v1
+  - url: /v1
     description: Production Server
-  - url: http://localhost:8080/v1/
-    description: Local Server
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
   schemas:
     DailyGameWord:
       type: object
@@ -113,7 +116,6 @@ components:
           format: int32
           example: 109
           description: Player score (read only and self calculated)
-
 paths:
   /countries:
     get:
@@ -178,8 +180,11 @@ paths:
 
   /dailyGame/{date}/{language}:
     get:
+      security:
+        - bearerAuth: [
+        ]
       tags:
-        - "Game End Points"
+        - "Game End Points (With Authentication)"
       parameters:
         - name: date
           in: path
@@ -215,8 +220,11 @@ paths:
                   $ref: '#/components/schemas/HallOfFame'
           description: Returns the hall of fame
     post:
+      security:
+        - bearerAuth: [
+        ]
       tags:
-        - "Game End Points"
+        - "Game End Points (With Authentication)"
       parameters:
         - name: Device-Id
           in: header

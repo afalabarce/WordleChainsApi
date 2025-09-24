@@ -1,5 +1,6 @@
 package dev.afalabarce.wordlechains.api.common
 
+import dev.afalabarce.wordlechains.api.controllers.features.authentication.repository.developerExists
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -9,16 +10,25 @@ import io.ktor.server.auth.bearer
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import kotlinx.serialization.json.Json
+import org.jetbrains.exposed.v1.jdbc.Database
 
-fun Application.installAuthentication(tokenValidation: (String) -> Map<String, String>){
+fun Application.installAuthentication(database: Database){
+    val privateKeyPath = environment.config.property("ktor.application.security.privateKeyPath").getString()
+
     install(Authentication){
-        bearer (name = "auth-bearer") {
+        bearer {
             realm = "Wordle Chains"
             authenticate { tokenCredential ->
                 if (tokenCredential.token.isNotEmpty()) {
                     val encryptedCredentials = tokenCredential.token
-
-                    tokenValidation(encryptedCredentials)
+                    encryptedCredentials.decryptRSA(
+                        privateKeyPath = privateKeyPath
+                    )?.let { decryptedCredentials ->
+                        val (developerEmail, apiKey) = decryptedCredentials.split(":")
+                        database.developerExists(developerEmail, apiKey.replace("\n", ""))
+                    } ?: run {
+                        null
+                    }
                 } else {
                     null
                 }

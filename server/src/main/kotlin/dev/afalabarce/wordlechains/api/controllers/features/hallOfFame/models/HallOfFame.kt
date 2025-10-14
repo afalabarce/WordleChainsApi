@@ -16,5 +16,5 @@ data class HallOfFame(
     val wordsCount4:Long,
     val wordsCount5:Long,
     val wordsCount6:Long,
-    val score: Long = 0,
+    val score: Long,
 )

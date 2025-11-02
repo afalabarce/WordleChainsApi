@@ -72,3 +72,70 @@ En esta capa se gestiona absolutamente todo lo requerido para el acceso CRUD a l
 Como se comentó en la introducción, todo el proceso de conexión, extracción y actualización de datos
 se ha realizado utilizando el ORM Jetbrains Exposed, el cual proporciona una relativa simplicidad a la par
 que potencia.
+
+Esta capa está organizada en dos capas principales:
+
+- **common**: En la que implementamos la conexión a la base de datos a través de las configuraciones del
+[resources/application.yaml](server/src/main/resources/application.yaml), así como un método que nos
+garantice que todas las transacciones a la base de datos se realicen en una corrutina.
+- **features**: En esta capa, implementamos para cada feature las definiciones de las tablas de exposed, así
+como sus dao. Si bien el objetivo de este README no es mostrar un tutorial sobre Exposed, vamos a mostrar
+un ejemplo, que involucre una entidad maestro detalle (quizá de lo más complejo).<br/>
+Veamos tanto los ficheros que definen las tablas, como los mapeadores que se van a utilizar a fin de 
+mapear los datos desde / hasta las entidades expuestas en los controladores:
+```kotlin
+object ExposedDailyGame: IntIdTable(
+    name = "daily_game",
+    columnName = "daily_id"
+){
+    val date = long(name = "date")
+    val language = varchar(name = "language", length = 10)
+}
+
+class DailyGameDao(id: EntityID<Int>): IntEntity(id){
+    companion object : IntEntityClass<DailyGameDao>(ExposedDailyGame)
+    var date by ExposedDailyGame.date
+    var language by ExposedDailyGame.language
+    val words: SizedIterable<DailyGameWordDao> by DailyGameWordDao referrersOn ExposedDailyGameWord.dailyId
+
+}
+```
+```kotlin
+object ExposedDailyGameWord: IntIdTable(
+    name = "daily_game_words",
+    columnName = "daily_game_word_id"
+) {
+    val dailyId = reference(name = "daily_id", refColumn = ExposedDailyGame.id)
+    val wordId = reference("word_id", refColumn = ExposedWord.id)
+    val linkedWordId = reference("linked_word_id", refColumn = ExposedWord.id).nullable()
+    val linkingPosition = integer(name = "linking_position").nullable()
+    val linkedWordPosition = integer(name = "linked_word_position").nullable()
+
+    init {
+        foreignKey(
+            dailyId to ExposedDailyGame.id,
+            wordId to ExposedWord.id,
+            linkedWordId to ExposedWord.id
+        )
+    }
+}
+
+class DailyGameWordDao(id: EntityID<Int>): IntEntity(id){
+    companion object : IntEntityClass<DailyGameWordDao>(ExposedDailyGameWord)
+    var dailyId by ExposedDailyGameWord.dailyId
+    var word: WordDao by WordDao referencedOn ExposedDailyGameWord.wordId
+    var linkedWord by ExposedDailyGameWord.linkedWordId
+    var linkingPosition by ExposedDailyGameWord.linkingPosition
+    var linkedWordPosition by ExposedDailyGameWord.linkedWordPosition
+}
+```
+Como podemos ver, tenemos dos entidades, la maestra (ExposedDailyGame) y la que carga el detalle de la 
+misma (ExposedDailyGameWord), la cual como podemos apreciar se relaciona con la primera a través de 
+una relación uno-a-muchos, garantizando que una palabra, en base a esta relación solo puede repetirse
+una vez en una partida diaria.
+
+Si nos fijamos detenidamente, una configuración de exposed para base de datos consta de dos partes:
+
+- La definición de la tabla de forma lógica (que "coincidirá" con la representación de la base de datos).
+- El Dao, que será el que implemente la lógica CRUD, así como el mapeo de datos de un registro, incluyendo
+la carga automática de los datos relacionados.

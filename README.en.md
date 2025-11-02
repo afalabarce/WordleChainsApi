@@ -1,10 +1,11 @@
+md
 # Wordle Chains API
 
 ## Introduction
 
 This project implements a REST API example developed with the [Kotlin](https://kotlinlang.org/) programming language and the [Ktor](https://ktor.io/) framework, aimed at being used for the implementation of a Wordle-style word game.
 
-The following paragraphs and sections will describe both how the implementation was carried out and its deployment on a production server (along with the corresponding challenges).
+In the following paragraphs and sections, we will describe both how the implementation was carried out and its deployment on a production server (along with the corresponding challenges).
 
 ## Technologies Used
 
@@ -24,7 +25,7 @@ This project is based on an [MVC (Model-View-Controller)](https://en.wikipedia.o
 
 The entire project is distributed into three main packages:
 - **common**: Where we host extension functions and the definition of plugins used by Ktor (authentication, routing, serialization, etc.).
-- **database**: Where the database structure is defined, attending to the particularities in the definition of types and DAOs of Exposed.
+- **database**: where the database structure is defined, attending to the particularities in the definition of types and DAOs of Exposed.
 - **controllers**: Where we define the controllers that will define the endpoints that the ReST service will expose.
 
 There is a special folder called **resources** where the different configuration parameters of the service are stored:
@@ -37,7 +38,7 @@ In this section, we will describe in detail the how and why of the decisions mad
 
 ### common
 
-In this layer, we define everything necessary that will represent and be part of the service's core. We have everything divided into three files:
+In this layer, we define everything necessary that will represent and be part of the service's core. We have it all divided into three files:
 - **Extensions.kt**: Extension functions are implemented here to provide clarity to the code, for example, a date validator and a decryption function.
 - **PluginsInstall.kt**: In this file, we define the different plugins that will be activated in Ktor, so that our service has the desired functionality.<br/>
   For this, a couple of methods are defined with the objective of separating functionality, as one depends on the database engine (through Exposed) having made a successful connection.<br/>
@@ -46,5 +47,65 @@ In this layer, we define everything necessary that will represent and be part of
 
 ### database
 
-This layer manages absolutely everything required for CRUD access to the database.
+In this layer, all that is required for CRUD access to the database is managed.
 As mentioned in the introduction, the entire process of connecting, extracting, and updating data has been done using the Jetbrains Exposed ORM, which provides relative simplicity along with power.
+
+This layer is organized into two main layers:
+
+- **common**: Where we implement the database connection through the configurations in [resources/application.yaml](server/src/main/resources/application.yaml), as well as a method that guarantees that all database transactions are performed in a coroutine.
+- **features**: In this layer, we implement the definitions of the Exposed tables and their DAOs for each feature. While the goal of this README is not to be an Exposed tutorial, we will show an example involving a master-detail entity (perhaps one of the most complex aspects).<br/>
+  Let's look at both the files that define the tables and the mappers that will be used to map the data from/to the entities exposed in the controllers:
+```kotlin
+object ExposedDailyGame: IntIdTable(
+    name = "daily_game",
+    columnName = "daily_id"
+){
+    val date = long(name = "date")
+    val language = varchar(name = "language", length = 10)
+}
+
+class DailyGameDao(id: EntityID<Int>): IntEntity(id){
+    companion object : IntEntityClass<DailyGameDao>(ExposedDailyGame)
+    var date by ExposedDailyGame.date
+    var language by ExposedDailyGame.language
+    val words: SizedIterable<DailyGameWordDao> by DailyGameWordDao referrersOn ExposedDailyGameWord.dailyId
+
+}
+```
+```kotlin
+object ExposedDailyGameWord: IntIdTable(
+    name = "daily_game_words",
+    columnName = "daily_game_word_id"
+) {
+    val dailyId = reference(name = "daily_id", refColumn = ExposedDailyGame.id)
+    val wordId = reference("word_id", refColumn = ExposedWord.id)
+    val linkedWordId = reference("linked_word_id", refColumn = ExposedWord.id).nullable()
+    val linkingPosition = integer(name = "linking_position").nullable()
+    val linkedWordPosition = integer(name = "linked_word_position").nullable()
+
+    init {
+        foreignKey(
+            dailyId to ExposedDailyGame.id,
+            wordId to ExposedWord.id,
+            linkedWordId to ExposedWord.id
+        )
+    }
+}
+
+class DailyGameWordDao(id: EntityID<Int>): IntEntity(id){
+    companion object : IntEntityClass<DailyGameWordDao>(ExposedDailyGameWord)
+    var dailyId by ExposedDailyGameWord.dailyId
+    var word: WordDao by WordDao referencedOn ExposedDailyGameWord.wordId
+    var linkedWord by ExposedDailyGameWord.linkedWordId
+    var linkingPosition by ExposedDailyGameWord.linkingPosition
+    var linkedWordPosition by ExposedDailyGameWord.linkedWordPosition
+}
+```
+As we can see, we have two entities, the master (ExposedDailyGame) and the one that loads its detail 
+(ExposedDailyGameWord), which, as we can appreciate, is related to the first through a one-to-many relationship, 
+ensuring that a word, based on this relationship, can only be repeated once in a daily game.
+
+If we look closely, an Exposed configuration for a database consists of two parts:
+- The logical definition of the table (which will "coincide" with the database representation).
+- The DAO, which will be the one that implements the CRUD logic, as well as the mapping of data from a record, including 
+the automatic loading of the related data.

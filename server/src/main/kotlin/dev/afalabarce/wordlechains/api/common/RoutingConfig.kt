@@ -5,11 +5,14 @@ import dev.afalabarce.wordlechains.api.controllers.features.dailyGame.getDailyGa
 import dev.afalabarce.wordlechains.api.controllers.features.hallOfFame.getHallOfFame
 import dev.afalabarce.wordlechains.api.controllers.features.hallOfFame.nickAvailable
 import dev.afalabarce.wordlechains.api.controllers.features.hallOfFame.updateHallOfFame
+import dev.afalabarce.wordlechains.api.controllers.features.words.addNewWord
 import dev.afalabarce.wordlechains.api.controllers.features.words.availableLanguages
 import dev.afalabarce.wordlechains.api.controllers.features.words.getWords
+import dev.afalabarce.wordlechains.api.controllers.features.words.models.Word
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.swagger.swaggerUI
+import io.ktor.server.request.receive
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
@@ -52,6 +55,11 @@ fun Application.configureRouting(database: Database){
             post(path = "/v1/hallOfFame") {
 
                 call.updateHallOfFame(database)
+            }
+
+            post(path = "/v1/words") {
+                val newWord = call.receive<Word>()
+                call.addNewWord(database, newWord)
             }
         }
     }

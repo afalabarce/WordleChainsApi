@@ -151,6 +151,22 @@ paths:
                 items:
                   $ref: '#/components/schemas/Word'
           description: Returns a list of words
+  /words:
+    post:
+      tags:
+        - "Game End Points (With Authentication)"
+      requestBody:
+        description: The hall of fame to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Word'
+      responses:
+        '200':
+          description: OK - The new word has been added
+        '400':
+          description: Bad Request - The new word could not be added
 
   /availableLanguages:
     get:
